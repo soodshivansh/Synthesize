@@ -2,10 +2,6 @@
   "name": "synthesize",
   "version": "1.0.0",
   "private": true,
-  "workspaces": [
-    "apps/client",
-    "apps/MCP-orchestrator"
-  ],
   "scripts": {
     "dev": "pnpm --filter client dev",
     "build": "pnpm --filter client build",
