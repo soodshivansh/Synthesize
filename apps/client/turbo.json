@@ -1,0 +1,8 @@
+{
+  "tasks": {
+    "release": {
+      "dependsOn": ["^build"],
+      "cache": false
+    }
+  }
+}
