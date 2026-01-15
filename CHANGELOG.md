@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/soodshivansh/Synthesize/compare/v1.0.0...v1.0.1) (2026-01-15)
+
+
+### Bug Fixes
+
+* Delete apps/MCP-orchestrator/build directory ([e31ee6f](https://github.com/soodshivansh/Synthesize/commit/e31ee6f891f63fd01383705c8efdeb1ecff98065))
+
 # 1.0.0 (2026-01-15)
 
 
