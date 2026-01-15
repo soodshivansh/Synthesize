@@ -1,1 +1,7 @@
 /node_modules
+.next
+build
+dist
+out
+.turbo
+*.log
