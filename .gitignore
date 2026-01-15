@@ -23,6 +23,7 @@ dist/
 .DS_Store
 *.pem
 .turbo
+.amazonq/
 
 # debug
 npm-debug.log*
