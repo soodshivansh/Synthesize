@@ -1,0 +1,10 @@
+# 1.0.0 (2026-01-15)
+
+
+### Bug Fixes
+
+* configure pnpm workspace and CI ([7d528e6](https://github.com/soodshivansh/Synthesize/commit/7d528e69b6ab8a56777c53a79b425ff03191ffa8))
+* configured semantic release ([b3cbd37](https://github.com/soodshivansh/Synthesize/commit/b3cbd377bbf8f3131243f57010de015497c26a64))
+* sematic release ([bd2e398](https://github.com/soodshivansh/Synthesize/commit/bd2e398586843239b010632aaa8f9751a5dd39fc))
+* sematic release fix ([55bd059](https://github.com/soodshivansh/Synthesize/commit/55bd059901127deee9e19d1438bef135a6f6ddf1))
+* version upgrade S.R ([6ed04fb](https://github.com/soodshivansh/Synthesize/commit/6ed04fb2672305e65e7df88c37a99025bfccc111))
