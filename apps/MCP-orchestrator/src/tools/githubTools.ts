@@ -5,78 +5,77 @@ import { handleToolError } from "../utils/errorHandler.js";
 import "../utils/envLoader.js";
 
 export function registerGitHubTools(server: McpServer) {
-  const client = new GitHubMcpClient();
-  
   server.registerTool(
-    "github_search_repositories",
+    "get_github_user",
     {
-      description: "Fetch all repositories for the authenticated GitHub user",
+      description: "Get GitHub user profile information",
       inputSchema: z.object({
-        token: z.string().optional().describe("GitHub PAT"),
+        username: z.string().describe("GitHub username"),
       }),
     },
-    async ({ token }) => {
-      const githubToken = token || process.env.GITHUB_TOKEN;
+    async ({ username }: any) => {
+      const githubToken = process.env.GITHUB_PERSONAL_ACCESS_TOKEN;
       if (!githubToken) {
-        throw new Error("GitHub token not found. Provide it as parameter or set GITHUB_TOKEN in .env file");
+        throw new Error("GITHUB_PERSONAL_ACCESS_TOKEN not set");
       }
       
       try {
-        await client.connect(githubToken);
-        
-        const data = await client.callTool("search_repositories", {
-          query: "user:@me",
+        const response = await fetch(`https://api.github.com/users/${username}`, {
+          headers: {
+            Authorization: `Bearer ${githubToken}`,
+            Accept: "application/vnd.github+json",
+          },
         });
         
+        if (!response.ok) {
+          throw new Error(`GitHub API error: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
         return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(data, null, 2),
-            },
-          ],
+          content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
         };
       } catch (error) {
         return handleToolError(error);
-      } finally {
-        await client.close();
       }
     }
   );
 
   server.registerTool(
-    "github_get_file_contents",
+    "github_proxy",
     {
-      description: "Get contents of a file or directory for the authenticated GitHub user",
+      description: "Proxy to GitHub MCP server. First call with listTools=true to discover available tools, then call specific tools.",
       inputSchema: z.object({
         token: z.string().optional().describe("GitHub PAT"),
-        owner: z.string().describe("Owner of the repository"),
-        repo: z.string().describe("Name of the repository"),
-        path: z.string().describe("Path to file/directory"),
+        listTools: z.boolean().optional().describe("Set to true to list all available tools"),
+        toolName: z.string().optional().describe("Name of the tool to call"),
+        toolArgs: z.record(z.unknown()).optional().describe("Arguments for the tool"),
       }),
     },
-    async ({ token, owner, repo, path }) => {
-      const githubToken = token || process.env.GITHUB_TOKEN;
+    async ({ token, listTools, toolName, toolArgs }: any) => {
+      const githubToken = token || process.env.GITHUB_PERSONAL_ACCESS_TOKEN;
       if (!githubToken) {
-        throw new Error("GitHub token not found. Provide it as parameter or set GITHUB_TOKEN in .env file");
+        throw new Error("GitHub token not provided and GITHUB_PERSONAL_ACCESS_TOKEN not set");
       }
+      const client = new GitHubMcpClient();
       
       try {
         await client.connect(githubToken);
         
-        const data = await client.callTool("get_file_contents", {
-          owner: owner,
-          repo: repo,
-          path: path,
-        });
+        if (listTools) {
+          const tools = await client.listTools();
+          return {
+            content: [{ type: "text", text: JSON.stringify(tools, null, 2) }],
+          };
+        }
         
+        if (!toolName) {
+          throw new Error("toolName is required when listTools is false");
+        }
+        
+        const data = await client.callTool(toolName, toolArgs || {});
         return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(data, null, 2),
-            },
-          ],
+          content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
         };
       } catch (error) {
         return handleToolError(error);

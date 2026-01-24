@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { registerGitHubTools } from "./tools/githubTools.js";
+import "./utils/envLoader.js";
 
 const server = new McpServer({
   name: "github-orchestrator",
