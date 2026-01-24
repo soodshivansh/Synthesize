@@ -19,7 +19,7 @@ export function registerToolForGroq(tool: ToolDefinition) {
   registeredTools.push(tool);
 }
 
-export async function generateText(prompt: string) {
+export async function generateText(prompt: string, conversationHistory: any[] = []) {
   const tools = registeredTools.map(tool => ({
     type: "function" as const,
     function: {
@@ -29,7 +29,10 @@ export async function generateText(prompt: string) {
     }
   }));
   
-  const messages: any[] = [{ role: "user", content: prompt }];
+  const messages: any[] = [
+    ...conversationHistory,
+    { role: "user", content: prompt }
+  ];
   
   const chatCompletion = await groq.chat.completions.create({
     messages,

@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { registerGitHubTools } from "./tools/githubTools.js";
+import { registerCustomTools } from "./tools/customTools.js";
 import "./utils/envLoader.js";
 
 const server = new McpServer({
@@ -9,6 +10,7 @@ const server = new McpServer({
 });
 
 registerGitHubTools(server);
+registerCustomTools(server);
 
 async function main() {
   const transport = new StdioServerTransport();

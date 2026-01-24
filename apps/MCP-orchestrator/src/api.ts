@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { registerGitHubTools } from './tools/githubTools.js';
+import { registerCustomTools } from './tools/customTools.js';
 import { generateText } from './services/groqService.js';
 import './utils/envLoader.js';
 
@@ -15,11 +16,13 @@ const server = new McpServer({
 });
 
 registerGitHubTools(server);
+registerCustomTools(server);
 
+// will be using SSE approach for streaming later
 app.post('/api/chat', async (req, res) => {
   try {
-    const { message } = req.body;
-    const response = await generateText(message);
+    const { message, conversationHistory = [] } = req.body;
+    const response = await generateText(message, conversationHistory);
     res.json({ response });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
