@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { registerGitHubTools } from './tools/githubTools.js';
 import { registerCustomTools } from './tools/customTools.js';
@@ -7,8 +8,9 @@ import { generateText } from './services/groqService.js';
 import './utils/envLoader.js';
 
 const app = express();
-app.use(cors());
+app.use(cors({ credentials: true, origin: process.env.CLIENT_URL || 'http://localhost:3000' }));
 app.use(express.json());
+app.use(cookieParser());
 
 const server = new McpServer({
   name: 'github-orchestrator',
@@ -22,7 +24,8 @@ registerCustomTools(server);
 app.post('/api/chat', async (req, res) => {
   try {
     const { message, conversationHistory = [] } = req.body;
-    const response = await generateText(message, conversationHistory);
+    const githubToken = req.cookies.github_access_token;
+    const response = await generateText(message, conversationHistory, githubToken);
     res.json({ response });
   } catch (error: any) {
     res.status(500).json({ error: error.message });

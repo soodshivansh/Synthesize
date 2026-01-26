@@ -19,7 +19,7 @@ export function registerToolForGroq(tool: ToolDefinition) {
   registeredTools.push(tool);
 }
 
-export async function generateText(prompt: string, conversationHistory: any[] = []) {
+export async function generateText(prompt: string, conversationHistory: any[] = [], githubToken?: string) {
   const tools = registeredTools.map(tool => ({
     type: "function" as const,
     function: {
@@ -52,7 +52,11 @@ export async function generateText(prompt: string, conversationHistory: any[] = 
     for (const toolCall of message.tool_calls) {
       const tool = registeredTools.find(t => t.name === toolCall.function.name);
       if (tool) {
-        const result = await tool.handler(JSON.parse(toolCall.function.arguments));
+        const args = JSON.parse(toolCall.function.arguments);
+        if (githubToken) {
+          args.token = githubToken;
+        }
+        const result = await tool.handler(args);
         messages.push({
           role: "tool",
           tool_call_id: toolCall.id,

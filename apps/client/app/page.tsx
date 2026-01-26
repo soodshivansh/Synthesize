@@ -1,6 +1,6 @@
 import { getGitHubUser } from "@/lib/github";
-import { Navbar } from "./navbar";
-import { ChatInterface } from "./chat-interface";
+import { Navbar } from "../components/core/navbar";
+import { ChatInterface } from "../components/core/chat-interface";
 import { Button } from "@/components/ui/button";
 
 export default async function Home() {
