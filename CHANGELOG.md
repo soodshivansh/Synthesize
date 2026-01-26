@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/soodshivansh/Synthesize/compare/v1.0.1...v1.1.0) (2026-01-26)
+
+
+### Features
+
+* added github tools and groq ([#5](https://github.com/soodshivansh/Synthesize/issues/5)) ([1121b41](https://github.com/soodshivansh/Synthesize/commit/1121b41ad62029555cbb892d3dce1039ccc283fd))
+
 ## [1.0.1](https://github.com/soodshivansh/Synthesize/compare/v1.0.0...v1.0.1) (2026-01-15)
 
 
