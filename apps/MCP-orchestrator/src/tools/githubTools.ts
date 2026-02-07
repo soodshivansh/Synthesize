@@ -6,17 +6,18 @@ import { registerToolForGroq } from "../services/groqService.js";
 import "../utils/envLoader.js";
 
 export function registerGitHubTools(server: McpServer) {
-  const getUserSchema = z.object({
-    username: z.string().describe("GitHub username"),
+  // Tool to get authenticated user's profile
+  const getAuthenticatedUserSchema = z.object({
+    token: z.string().optional().describe("GitHub token (injected automatically)")
   });
   
-  const getUserHandler = async ({ username }: any) => {
-    const githubToken = process.env.GITHUB_PERSONAL_ACCESS_TOKEN;
+  const getAuthenticatedUserHandler = async ({ token }: { token?: string }) => {
+    const githubToken = token || process.env.GITHUB_PERSONAL_ACCESS_TOKEN;
     if (!githubToken) {
-      throw new Error("GITHUB_PERSONAL_ACCESS_TOKEN not set");
+      throw new Error("GitHub token not provided and GITHUB_PERSONAL_ACCESS_TOKEN not set");
     }
     
-    const response = await fetch(`https://api.github.com/users/${username}`, {
+    const response = await fetch(`https://api.github.com/user`, {
       headers: {
         Authorization: `Bearer ${githubToken}`,
         Accept: "application/vnd.github+json",
@@ -31,21 +32,21 @@ export function registerGitHubTools(server: McpServer) {
   };
   
   registerToolForGroq({
-    name: "get_github_user",
-    description: "Get GitHub user profile information",
-    inputSchema: getUserSchema,
-    handler: getUserHandler
+    name: "get_authenticated_github_user",
+    description: "Get the currently authenticated user's GitHub profile. ALWAYS call this first when user asks about 'my' profile, repos, or any personal information. Returns username, id, email, and other profile data.",
+    inputSchema: getAuthenticatedUserSchema,
+    handler: getAuthenticatedUserHandler
   });
   
   server.registerTool(
-    "get_github_user",
+    "get_authenticated_github_user",
     {
-      description: "Get GitHub user profile information",
-      inputSchema: getUserSchema,
+      description: "Get the authenticated GitHub user's profile information using the token",
+      inputSchema: getAuthenticatedUserSchema,
     },
-    async ({ username }: any) => {
+    async () => {
       try {
-        const data = await getUserHandler({ username });
+        const data = await getAuthenticatedUserHandler({});
         return {
           content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
         };
@@ -56,8 +57,8 @@ export function registerGitHubTools(server: McpServer) {
   );
 
   const proxySchema = z.object({
-    token: z.string().optional().describe("GitHub PAT"),
-    listTools: z.boolean().optional().describe("Set to true to list all available tools"),
+    token: z.string().optional().describe("GitHub PAT - leave empty, injected automatically"),
+    listTools: z.union([z.boolean(), z.string()]).optional().describe("Set to true to list all available tools"),
     toolName: z.string().optional().describe("Name of the tool to call"),
     toolArgs: z.record(z.unknown()).optional().describe("Arguments for the tool"),
   });
@@ -67,12 +68,16 @@ export function registerGitHubTools(server: McpServer) {
     if (!githubToken) {
       throw new Error("GitHub token not provided and GITHUB_PERSONAL_ACCESS_TOKEN not set");
     }
+    
+    // Coerce listTools to boolean (LLM sometimes sends "true"/"false" as strings)
+    const shouldListTools = listTools === true || listTools === "true";
+    
     const client = new GitHubMcpClient();
     
     try {
       await client.connect(githubToken);
       
-      if (listTools) {
+      if (shouldListTools) {
         return await client.listTools();
       }
       
@@ -88,7 +93,7 @@ export function registerGitHubTools(server: McpServer) {
   
   registerToolForGroq({
     name: "github_proxy",
-    description: "Proxy to GitHub MCP server. First call with listTools=true to discover available tools, then call specific tools.",
+    description: "Access advanced GitHub operations via MCP server. IMPORTANT: First call with listTools=true to discover all available tools and their parameters. Then call specific tools by name. Token is handled automatically - do not provide it.",
     inputSchema: proxySchema,
     handler: proxyHandler
   });

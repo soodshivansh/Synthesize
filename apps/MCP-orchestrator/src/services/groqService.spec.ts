@@ -8,7 +8,7 @@ async function test() {
   registerGitHubTools(server);
   
   try {
-    const result = await generateText('Get the GitHub profile for user soodshivansh');
+    const result = await generateText('how many planets are there in solar system');
     console.log('Generated text:', result);
   } catch (error) {
     console.error('Error:', error);

@@ -1,9 +1,7 @@
 "use client";
-import React from "react"
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Send } from "lucide-react";
+import { ArrowUp, Plus } from "lucide-react";
 import dynamic from "next/dynamic";
 
 const ReactMarkdown = dynamic(() => import("react-markdown"), { ssr: false });
@@ -19,6 +17,7 @@ export function ChatInterface() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     setMessages([
@@ -34,6 +33,13 @@ export function ChatInterface() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
+    }
+  }, [input]);
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
@@ -44,8 +50,6 @@ export function ChatInterface() {
       sender: "user",
     };
 
-    console.log("Sending message:", userMessage);
-
     setMessages((prev) => [...prev, userMessage]);
     const userInput = input;
     setInput("");
@@ -54,9 +58,7 @@ export function ChatInterface() {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_MCP_URL}/api/chat`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
           message: userInput,
@@ -71,7 +73,7 @@ export function ChatInterface() {
       
       const assistantMessage: Message = {
         id: Math.random().toString(36).substring(2, 11),
-        text: data.response || "Sorry, I couldn't process your request. client",
+        text: data.response || "Sorry, I couldn't process your request.",
         sender: "assistant",
       };
       
@@ -87,18 +89,32 @@ export function ChatInterface() {
       setIsLoading(false);
     }
   };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage(e);
+    }
+  };
+
   return (
-    <div className="flex h-screen flex-col bg-black overflow-hidden">
-      <div className="flex-1 overflow-y-auto flex flex-col scrollbar-custom pt-4">
-        <div className="flex-1"></div>
-        <div className="mx-auto w-full max-w-2xl px-4 py-6 space-y-4">
+    <div className="flex h-screen flex-col bg-neutral-950">
+      {/* Messages area */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="mx-auto max-w-2xl px-4 py-8 space-y-6">
           {messages.map((message) => (
             <div
               key={message.id}
               className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
             >
-              <div className="max-w-[80%] rounded-lg px-4 py-2 bg-white text-black border border-gray-200">
-                <div className="text-sm prose prose-sm max-w-none">
+              <div
+                className={`max-w-[85%] rounded-2xl px-4 py-3 ${
+                  message.sender === "user"
+                    ? "bg-neutral-800 text-neutral-100"
+                    : "bg-transparent text-neutral-300"
+                }`}
+              >
+                <div className="text-sm prose prose-invert prose-sm max-w-none">
                   <ReactMarkdown>{message.text}</ReactMarkdown>
                 </div>
               </div>
@@ -106,41 +122,55 @@ export function ChatInterface() {
           ))}
           {isLoading && (
             <div className="flex justify-start">
-              <div className="rounded-lg bg-white px-4 py-2 border border-gray-200">
-                <div className="flex space-x-2">
-                  <div className="h-2 w-2 rounded-full bg-gray-400 animate-bounce" />
-                  <div className="h-2 w-2 rounded-full bg-gray-400 animate-bounce delay-100" />
-                  <div className="h-2 w-2 rounded-full bg-gray-400 animate-bounce delay-200" />
-                </div>
+              <div className="flex items-center gap-1 px-4 py-3">
+                <div className="h-2 w-2 rounded-full bg-neutral-500 animate-bounce [animation-delay:-0.3s]" />
+                <div className="h-2 w-2 rounded-full bg-neutral-500 animate-bounce [animation-delay:-0.15s]" />
+                <div className="h-2 w-2 rounded-full bg-neutral-500 animate-bounce" />
               </div>
             </div>
           )}
           <div ref={messagesEndRef} />
         </div>
       </div>
-      <div>
-        <form
-          onSubmit={handleSendMessage}
-          className="mx-auto max-w-2xl px-4 py-4"
-        >
-          <div className="flex items-center gap-3 bg-white rounded-xl px-4 py-2 shadow-md">
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask anything..."
-              className="flex-1 border-none focus-visible:ring-0 text-black placeholder:text-gray-400"
-            />
 
-            <Button
-              type="submit"
-              disabled={isLoading || !input.trim()}
-              size="icon"
-              className="h-10 w-10 rounded-full bg-black text-white hover:bg-gray-900"
-            >
-              <Send className="h-4 w-4" />
-            </Button>
-          </div>
-        </form>
+      {/* Input area */}
+      <div className="border-neutral-800 bg-neutral-950 p-4">
+        <div className="mx-auto max-w-2xl">
+          <form onSubmit={handleSendMessage}>
+            <div className="relative rounded-2xl border border-neutral-700 bg-neutral-900 focus-within:border-neutral-600 transition-colors">
+              <textarea
+                ref={textareaRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Ask, Search or Chat..."
+                rows={1}
+                className="w-full resize-none bg-transparent px-4 pt-4 pb-12 text-neutral-100 placeholder:text-neutral-500 focus:outline-none text-sm"
+              />
+              <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-full border border-neutral-700 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                  <span className="text-sm text-neutral-500">Auto</span>
+                </div>
+                <Button
+                  type="submit"
+                  disabled={isLoading || !input.trim()}
+                  size="icon"
+                  className="h-8 w-8 rounded-full bg-neutral-100 text-neutral-900 hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ArrowUp className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

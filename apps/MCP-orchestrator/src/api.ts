@@ -25,9 +25,13 @@ app.post('/api/chat', async (req, res) => {
   try {
     const { message, conversationHistory = [] } = req.body;
     const githubToken = req.cookies.github_access_token;
+    
+    console.log('Chat request received:', { message, hasToken: !!githubToken });
+    
     const response = await generateText(message, conversationHistory, githubToken);
     res.json({ response });
   } catch (error: any) {
+    console.error('Chat error:', error);
     res.status(500).json({ error: error.message });
   }
 });
