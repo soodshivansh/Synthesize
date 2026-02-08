@@ -1,3 +1,10 @@
+## [1.1.7](https://github.com/soodshivansh/Synthesize/compare/v1.1.6...v1.1.7) (2026-02-08)
+
+
+### Bug Fixes
+
+* groq model change ([4197d56](https://github.com/soodshivansh/Synthesize/commit/4197d56abcee724b5ccb323da2735a18ac59e972))
+
 ## [1.1.6](https://github.com/soodshivansh/Synthesize/compare/v1.1.5...v1.1.6) (2026-02-08)
 
 
