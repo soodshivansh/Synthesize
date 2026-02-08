@@ -1,3 +1,10 @@
+## [1.1.4](https://github.com/soodshivansh/Synthesize/compare/v1.1.3...v1.1.4) (2026-02-08)
+
+
+### Bug Fixes
+
+* fix for auth-complete ([53b371f](https://github.com/soodshivansh/Synthesize/commit/53b371f4c19fc9161fb11b312f413b35fb838af2))
+
 ## [1.1.3](https://github.com/soodshivansh/Synthesize/compare/v1.1.2...v1.1.3) (2026-02-08)
 
 
