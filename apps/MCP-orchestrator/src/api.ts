@@ -20,6 +20,10 @@ const server = new McpServer({
 registerGitHubTools(server);
 registerCustomTools(server);
 
+app.get('/', async (req, res) => {
+  res.json({ message: "MCP Server for Synthesize" });
+})
+
 // will be using SSE approach for streaming later
 app.post('/api/chat', async (req, res) => {
   try {
