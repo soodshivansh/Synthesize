@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/soodshivansh/Synthesize/compare/v1.1.1...v1.1.2) (2026-02-08)
+
+
+### Bug Fixes
+
+* callback to localhost error ([34ddb67](https://github.com/soodshivansh/Synthesize/commit/34ddb6749e8464307abec2ef17cf6a5799e27cb1))
+
 ## [1.1.1](https://github.com/soodshivansh/Synthesize/compare/v1.1.0...v1.1.1) (2026-02-07)
 
 
