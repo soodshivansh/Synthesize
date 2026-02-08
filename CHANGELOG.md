@@ -1,3 +1,11 @@
+## [1.1.6](https://github.com/soodshivansh/Synthesize/compare/v1.1.5...v1.1.6) (2026-02-08)
+
+
+### Bug Fixes
+
+* added check when llm returns tool call instead of executing ([af59b68](https://github.com/soodshivansh/Synthesize/commit/af59b682eb477968797ee36bf47071db185422d5))
+* client UI fix ([5b81d5e](https://github.com/soodshivansh/Synthesize/commit/5b81d5ef0fd6a9d298fa2961989bfd3042bc31d1))
+
 ## [1.1.5](https://github.com/soodshivansh/Synthesize/compare/v1.1.4...v1.1.5) (2026-02-08)
 
 
