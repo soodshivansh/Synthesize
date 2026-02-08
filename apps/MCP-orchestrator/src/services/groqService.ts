@@ -190,7 +190,54 @@ export async function generateText(prompt: string, conversationHistory: any[] = 
         return finalCompletion.choices[0]?.message?.content || '';
       }
 
-      return message?.content || '';
+      // Check if LLM returned tool call syntax as text (common issue with some models)
+      const content = message?.content || '';
+      
+      // Pattern to match: github_proxy(toolName="...", toolArgs={...})
+      // Using a more robust extraction approach
+      const toolCallMatch = content.match(/github_proxy\s*\(\s*toolName\s*=\s*["']([^"']+)["']\s*,\s*toolArgs\s*=\s*(\{.*\})\s*\)/s);
+      
+      if (toolCallMatch) {
+        const [, toolName, toolArgsStr] = toolCallMatch;
+        const tool = registeredTools.find(t => t.name === 'github_proxy');
+        
+        if (tool) {
+          try {
+            // Parse toolArgs - handle both single and double quotes
+            const normalizedArgs = toolArgsStr.replace(/'/g, '"');
+            const toolArgs = JSON.parse(normalizedArgs);
+            
+            console.log(`Detected text-based tool call: github_proxy(${toolName})`, toolArgs);
+            
+            const result = await tool.handler({ 
+              token: githubToken, 
+              toolName, 
+              toolArgs 
+            });
+            
+            // Ask LLM to format the result nicely
+            const formatMessages: any[] = [
+              { role: "system", content: "You are a helpful assistant. Format the following GitHub API response in a clear, readable way for the user. Be concise and highlight the important information. Use markdown formatting." },
+              { role: "user", content: `The user asked: "${prompt}"\n\nHere's the GitHub API response:\n${JSON.stringify(result, null, 2)}` }
+            ];
+            
+            const formatCompletion = await groq.chat.completions.create({
+              messages: formatMessages,
+              model: GROQ_MODEL,
+              temperature: 0.5,
+              max_completion_tokens: 1024,
+              stream: false
+            });
+            
+            return formatCompletion.choices[0]?.message?.content || JSON.stringify(result, null, 2);
+          } catch (error: any) {
+            console.error('Error executing text-based tool call:', error);
+            return `I tried to fetch your GitHub data but encountered an error: ${error.message}`;
+          }
+        }
+      }
+
+      return content;
       
     } catch (error: any) {
       // Check if it's a tool validation error
