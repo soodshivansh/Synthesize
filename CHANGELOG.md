@@ -1,3 +1,10 @@
+## [1.1.3](https://github.com/soodshivansh/Synthesize/compare/v1.1.2...v1.1.3) (2026-02-08)
+
+
+### Bug Fixes
+
+* changed token storage from cookie to local ([a572ce0](https://github.com/soodshivansh/Synthesize/commit/a572ce0b47738d65ac75da7bc8972ba4f885604f))
+
 ## [1.1.2](https://github.com/soodshivansh/Synthesize/compare/v1.1.1...v1.1.2) (2026-02-08)
 
 
