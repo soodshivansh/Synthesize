@@ -107,7 +107,7 @@ export function ChatInterface() {
   };
 
   return (
-    <div className="flex h-screen flex-col bg-neutral-950">
+    <div className="flex h-full flex-col bg-neutral-950">
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto">
         <div className="mx-auto max-w-2xl px-4 py-8 space-y-6">

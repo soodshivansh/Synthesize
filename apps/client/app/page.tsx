@@ -1,13 +1,29 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import LoginPage from "@/components/core/login-page";
-import { redirect } from "next/navigation";
-import { getGitHubUser } from "@/lib/github";
+import { isAuthenticated } from "@/lib/auth";
 
-export default async function Home() {
-  const user = await getGitHubUser();
+export default function Home() {
+  const router = useRouter();
+  const [isChecking, setIsChecking] = useState(true);
 
-  if (!user) {
-    return <LoginPage />;
+  useEffect(() => {
+    if (isAuthenticated()) {
+      router.replace("/chat");
+    } else {
+      setIsChecking(false);
+    }
+  }, [router]);
+
+  if (isChecking) {
+    return (
+      <div className="flex h-full items-center justify-center bg-neutral-950">
+        <div className="text-neutral-400">Loading...</div>
+      </div>
+    );
   }
 
-  redirect("/chat");
+  return <LoginPage />;
 }
