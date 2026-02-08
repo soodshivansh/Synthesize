@@ -67,51 +67,36 @@ async function prefetchContext(githubToken?: string): Promise<PreFetchedContext>
 }
 
 function buildSystemPrompt(context: PreFetchedContext): string {
-  const toolList = registeredTools.map(t => `- ${t.name}: ${t.description}`).join('\n');
-  
   let userContext = '';
   if (context.authenticatedUser) {
     userContext = `
-## Authenticated User (use this info, don't call get_authenticated_github_user)
+## Authenticated User
 - Username: ${context.authenticatedUser.login}
 - Name: ${context.authenticatedUser.name || 'N/A'}
 - ID: ${context.authenticatedUser.id}
 - Public Repos: ${context.authenticatedUser.public_repos}`;
   }
 
-  let mcpToolsContext = '';
-  if (context.availableGitHubTools?.length) {
-    const toolsSummary = context.availableGitHubTools
-      .map((t: any) => `  - ${t.name}: ${t.description}`)
-      .join('\n');
-    mcpToolsContext = `
-## Available GitHub MCP Tools (via github_proxy)
-${toolsSummary}`;
-  }
-
-  return `You are a helpful GitHub assistant with access to tools.
+  return `You are a helpful GitHub assistant. You have access to function tools - USE THEM, don't describe them.
 ${userContext}
-${mcpToolsContext}
 
-## Direct Tools
-${toolList}
+CRITICAL RULES:
+1. When user asks to list repos, search repos, or any GitHub action - CALL THE TOOL IMMEDIATELY using function calling.
+2. DO NOT write out tool calls as text or JSON. Use the actual function calling mechanism.
+3. DO NOT explain what you're going to do. Just do it.
+4. DO NOT say "Let me try" or "I will call". Just call the function.
+5. For "my repos" or "my repositories", use github_proxy with toolName="search_repositories" and toolArgs={"query": "user:${context.authenticatedUser?.login || 'USERNAME'}"}
+6. Token is automatic - never include it in args.
 
-## Rules
-1. NEVER guess usernames or tokens - use the authenticated user info above.
-2. Tokens are injected automatically - never ask for them.
-3. For "my" queries, use the authenticated username: ${context.authenticatedUser?.login || '[not authenticated]'}
-4. Use github_proxy with toolName and toolArgs to call MCP tools listed above.
+WRONG (don't do this):
+"Let me call github_proxy with listTools=true..."
+{"name": "github_proxy", "parameters": {...}}
 
-## Common Patterns
-- "List my repos" → Use github_proxy with toolName="search_repositories" and toolArgs={"query": "user:${context.authenticatedUser?.login || 'USERNAME'}"}
-- "Search repos" → Use github_proxy with toolName="search_repositories" and toolArgs={"query": "<search terms>"}
-- "Get repo info" → Use github_proxy with toolName="get_repository" and appropriate args
-- "Create issue" → Use github_proxy with toolName="create_issue" and appropriate args
-
-Always construct the correct query/args based on the authenticated user info provided above.`;
+RIGHT (do this):
+[Actually call the github_proxy function using function calling]`;
 }
 
-const GROQ_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct";
+const GROQ_MODEL = "qwen/qwen3-32b";
 const MAX_RETRIES = 2;
 
 export async function generateText(prompt: string, conversationHistory: any[] = [], githubToken?: string) {
@@ -193,46 +178,53 @@ export async function generateText(prompt: string, conversationHistory: any[] = 
       // Check if LLM returned tool call syntax as text (common issue with some models)
       const content = message?.content || '';
       
-      // Pattern to match: github_proxy(toolName="...", toolArgs={...})
-      // Using a more robust extraction approach
-      const toolCallMatch = content.match(/github_proxy\s*\(\s*toolName\s*=\s*["']([^"']+)["']\s*,\s*toolArgs\s*=\s*(\{.*\})\s*\)/s);
+      // Detect if LLM is describing tool calls instead of executing them
+      const isDescribingToolCall = 
+        content.includes('"name": "github_proxy"') ||
+        content.includes("github_proxy") && content.includes("listTools") ||
+        content.includes("search_repositories") ||
+        content.match(/\{\s*"name"\s*:\s*"github_proxy"/);
       
-      if (toolCallMatch) {
-        const [, toolName, toolArgsStr] = toolCallMatch;
+      // Also detect common user intents that should trigger tool calls
+      const lowerPrompt = prompt.toLowerCase();
+      const wantsRepoList = 
+        (lowerPrompt.includes('list') && lowerPrompt.includes('repo')) ||
+        (lowerPrompt.includes('my') && lowerPrompt.includes('repo')) ||
+        (lowerPrompt.includes('show') && lowerPrompt.includes('repo')) ||
+        lowerPrompt.includes('my repositories');
+      
+      // If LLM failed to call tools properly, execute directly
+      if ((isDescribingToolCall || wantsRepoList) && context.authenticatedUser && githubToken) {
         const tool = registeredTools.find(t => t.name === 'github_proxy');
         
         if (tool) {
           try {
-            // Parse toolArgs - handle both single and double quotes
-            const normalizedArgs = toolArgsStr.replace(/'/g, '"');
-            const toolArgs = JSON.parse(normalizedArgs);
-            
-            console.log(`Detected text-based tool call: github_proxy(${toolName})`, toolArgs);
+            console.log('LLM failed to use function calling, executing tool directly');
             
             const result = await tool.handler({ 
               token: githubToken, 
-              toolName, 
-              toolArgs 
+              toolName: 'search_repositories',
+              toolArgs: { query: `user:${context.authenticatedUser.login}` }
             });
             
-            // Ask LLM to format the result nicely
+            // Format the result nicely
             const formatMessages: any[] = [
-              { role: "system", content: "You are a helpful assistant. Format the following GitHub API response in a clear, readable way for the user. Be concise and highlight the important information. Use markdown formatting." },
-              { role: "user", content: `The user asked: "${prompt}"\n\nHere's the GitHub API response:\n${JSON.stringify(result, null, 2)}` }
+              { role: "system", content: "Format this GitHub repository list in a clean, readable way. Use markdown. Show repo name, description, stars, and language. Be concise." },
+              { role: "user", content: `User asked: "${prompt}"\n\nRepositories:\n${JSON.stringify(result, null, 2)}` }
             ];
             
             const formatCompletion = await groq.chat.completions.create({
               messages: formatMessages,
               model: GROQ_MODEL,
-              temperature: 0.5,
+              temperature: 0.3,
               max_completion_tokens: 1024,
               stream: false
             });
             
             return formatCompletion.choices[0]?.message?.content || JSON.stringify(result, null, 2);
           } catch (error: any) {
-            console.error('Error executing text-based tool call:', error);
-            return `I tried to fetch your GitHub data but encountered an error: ${error.message}`;
+            console.error('Error executing direct tool call:', error);
+            return `I tried to fetch your GitHub repositories but encountered an error: ${error.message}`;
           }
         }
       }
