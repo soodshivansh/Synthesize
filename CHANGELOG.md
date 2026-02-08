@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/soodshivansh/Synthesize/compare/v1.1.0...v1.1.1) (2026-02-07)
+
+
+### Bug Fixes
+
+* changes for vercel deploy MCP ([389f265](https://github.com/soodshivansh/Synthesize/commit/389f265d15a1fa2ca8fae8a4e90a1e815590e08b))
+
 # [1.1.0](https://github.com/soodshivansh/Synthesize/compare/v1.0.1...v1.1.0) (2026-01-26)
 
 
