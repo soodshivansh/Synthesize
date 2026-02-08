@@ -1,3 +1,10 @@
+## [1.1.5](https://github.com/soodshivansh/Synthesize/compare/v1.1.4...v1.1.5) (2026-02-08)
+
+
+### Bug Fixes
+
+* server cors fix ([beaa6b8](https://github.com/soodshivansh/Synthesize/commit/beaa6b89bbada0d5f2b555b8050ee85996130f74))
+
 ## [1.1.4](https://github.com/soodshivansh/Synthesize/compare/v1.1.3...v1.1.4) (2026-02-08)
 
 
