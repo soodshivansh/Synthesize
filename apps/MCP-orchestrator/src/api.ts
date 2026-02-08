@@ -8,7 +8,11 @@ import { generateText } from './services/groqService.js';
 import './utils/envLoader.js';
 
 const app = express();
-app.use(cors({ credentials: true, origin: process.env.CLIENT_URL || 'http://localhost:3000' }));
+
+app.use(cors({ 
+  credentials: true, 
+  origin: ['http://localhost:3000', process.env.CLIENT_URL].filter(Boolean) as string[]
+}));
 app.use(express.json());
 app.use(cookieParser());
 
