@@ -24,7 +24,12 @@ registerCustomTools(server);
 app.post('/api/chat', async (req, res) => {
   try {
     const { message, conversationHistory = [] } = req.body;
-    const githubToken = req.cookies.github_access_token;
+    
+    // Get token from Authorization header or cookie (fallback)
+    const authHeader = req.headers.authorization;
+    const githubToken = authHeader?.startsWith('Bearer ') 
+      ? authHeader.slice(7) 
+      : req.cookies.github_access_token;
     
     console.log('Chat request received:', { message, hasToken: !!githubToken });
     

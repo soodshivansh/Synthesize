@@ -41,15 +41,11 @@ export async function GET(req: Request) {
     });
   }
 
-  cookieStore.set("github_access_token", tokenData.access_token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: 60 * 60,
-    path: "/",
-  });
-
   cookieStore.delete("github_oauth_state");
 
-  return NextResponse.redirect(new URL("/", req.url));
+  // Redirect to auth-complete page with token (will be stored in localStorage)
+  const redirectUrl = new URL("/auth-complete", req.url);
+  redirectUrl.searchParams.set("token", tokenData.access_token);
+  
+  return NextResponse.redirect(redirectUrl);
 }
