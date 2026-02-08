@@ -10,7 +10,10 @@ export async function GET(req: Request) {
 
   const storedState = cookieStore.get("github_oauth_state")?.value;
 
+  console.log('OAuth callback:', { code: !!code, state, storedState });
+
   if (!code || !state || state !== storedState) {
+    console.error('OAuth state mismatch:', { hasCode: !!code, hasState: !!state, stateMatch: state === storedState });
     return new NextResponse("Invalid OAuth state", { status: 401 });
   }
 
