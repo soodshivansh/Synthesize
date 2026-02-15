@@ -1,3 +1,11 @@
+## [1.1.8](https://github.com/soodshivansh/Synthesize/compare/v1.1.7...v1.1.8) (2026-02-15)
+
+
+### Bug Fixes
+
+* navbar logout fix ([41dc587](https://github.com/soodshivansh/Synthesize/commit/41dc587ccd35b99aab2cba35754a86a16e532f0a))
+* ui and model fixed ([dd9b673](https://github.com/soodshivansh/Synthesize/commit/dd9b673f66234a7dd4e62b2953b68b374e17fdb2))
+
 ## [1.1.7](https://github.com/soodshivansh/Synthesize/compare/v1.1.6...v1.1.7) (2026-02-08)
 
 
