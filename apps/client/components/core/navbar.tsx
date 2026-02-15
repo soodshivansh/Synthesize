@@ -25,13 +25,10 @@ export function Navbar({ user }: NavbarProps) {
     setIsMounted(true);
   }, []);
 
-  const handleLogout = async () => {
-    const response = await fetch("/api/auth/logout", {
-      method: "POST",
-    });
-    if (response.ok) {
-      window.location.href = "/";
-    }
+  const handleLogout = () => {
+    localStorage.removeItem("github_access_token");
+    localStorage.removeItem("github_token_expiry");
+    window.location.href = "/";
   };
 
   return (

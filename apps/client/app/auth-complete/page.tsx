@@ -13,6 +13,8 @@ function AuthCompleteContent() {
     
     if (token) {
       setAuthToken(token, 60 * 60 * 1000);
+      // Dispatch storage event to notify navbar
+      window.dispatchEvent(new Event('storage'));
       router.replace("/chat");
     } else {
       router.replace("/");

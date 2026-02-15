@@ -12,11 +12,15 @@ interface GitHubUser {
 
 export function ClientNavbar() {
   const [user, setUser] = useState<GitHubUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchUser = async () => {
       const token = getAuthToken();
-      if (!token) return;
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
 
       try {
         const res = await fetch("https://api.github.com/user", {
@@ -31,10 +35,20 @@ export function ClientNavbar() {
         }
       } catch (error) {
         console.error("Failed to fetch user:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchUser();
+    
+    // Listen for storage changes (when token is set)
+    const handleStorageChange = () => {
+      fetchUser();
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   return <Navbar user={user || undefined} />;
