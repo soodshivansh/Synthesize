@@ -35,7 +35,7 @@ export function Navbar({ user }: NavbarProps) {
   };
 
   return (
-    <nav className="border-b border-border bg-black">
+    <nav className="border-b border-neutral-800 bg-neutral-950">
       <div className="flex items-center justify-between px-4 py-3 md:px-6">
         <div className="text-xl font-bold text-white">Synthesize</div>
         {user && (

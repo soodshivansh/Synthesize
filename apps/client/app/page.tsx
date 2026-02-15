@@ -19,7 +19,7 @@ export default function Home() {
 
   if (isChecking) {
     return (
-      <div className="flex h-full items-center justify-center bg-neutral-950">
+      <div className="flex min-h-screen items-center justify-center bg-neutral-950">
         <div className="text-neutral-400">Loading...</div>
       </div>
     );

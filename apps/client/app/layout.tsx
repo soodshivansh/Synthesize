@@ -29,14 +29,16 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen min-h-dvh`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-neutral-950`}
       >
-        <header className="shrink-0 sticky top-0 z-50">
-          <ClientNavbar />
-        </header>
-        <main className="flex-1 overflow-auto">
-          {children}
-        </main>
+        <div className="flex flex-col h-screen overflow-hidden">
+          <header className="shrink-0 z-50">
+            <ClientNavbar />
+          </header>
+          <main className="flex-1 overflow-hidden">
+            {children}
+          </main>
+        </div>
       </body>
     </html>
   );

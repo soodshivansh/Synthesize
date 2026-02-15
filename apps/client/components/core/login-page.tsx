@@ -2,18 +2,18 @@ import { Button } from "../ui/button";
 
 export default function LoginPage() {
     return (
-        <div className="flex h-full w-full items-center justify-center px-4 bg-neutral-950">
-            <div className="w-full max-w-md space-y-6 rounded-xl border border-border bg-card p-8 text-center">
+        <div className="flex min-h-screen w-full items-center justify-center px-4 py-8 bg-neutral-950">
+            <div className="w-full max-w-md space-y-6 rounded-xl border border-neutral-800 bg-neutral-900 p-8 text-center shadow-xl">
                 <div>
                     <h1 className="text-3xl font-bold text-white">Synthesize</h1>
                 </div>
 
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-neutral-400">
                     Sign in with GitHub to continue
                 </p>
 
                 <form action="/api/auth/github" method="GET">
-                    <Button type="submit" className="w-full cursor-pointer">
+                    <Button type="submit" className="w-full cursor-pointer bg-white text-black hover:bg-neutral-100">
                         Login with GitHub
                     </Button>
                 </form>

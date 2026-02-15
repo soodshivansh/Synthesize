@@ -109,7 +109,7 @@ export function ChatInterface() {
   return (
     <div className="flex h-full flex-col bg-neutral-950">
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-800 scrollbar-track-transparent">
         <div className="mx-auto max-w-2xl px-4 py-8 space-y-6">
           {messages.map((message) => (
             <div
@@ -143,7 +143,7 @@ export function ChatInterface() {
       </div>
 
       {/* Input area */}
-      <div className="border-neutral-800 bg-neutral-950 p-4">
+      <div className="shrink-0 border-t border-neutral-800 bg-neutral-950 p-4 safe-area-inset-bottom">
         <div className="mx-auto max-w-2xl">
           <form onSubmit={handleSendMessage}>
             <div className="relative rounded-2xl border border-neutral-700 bg-neutral-900 focus-within:border-neutral-600 transition-colors">
